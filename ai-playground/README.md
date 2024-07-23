@@ -31,6 +31,7 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 ## To Do
 
 [x] Setup the project
+[x] Add shadcn UI
 [ ] Add pages for all nav items
 [ ] Support local and remote inference servers with model selection
 [ ] Text generation
