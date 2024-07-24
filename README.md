@@ -74,22 +74,22 @@ This will start the development server and open the application in your default 
 
 ### Advanced Concepts
 
-[ ] - [Long-term Memory](./longterm-memory/): An Agent with Long-Term Personalize memory
+[ ] - [Long-term Memory](./longterm-memory/): An Agent with Long-Term Personalized memory
 [ ] - [Reflective Memory](./refelctive-memory/): Combine - Reflection, planning and multi-agent workflows
 
 ### Complete Applications
 
 [ ] - [Chatbot](./chatbot): A complete chat bot with memory
+[ ] - [Researcher](./web-research): AI Web Research Assistant
 [ ] - [Movie Recommendations](./movie-recommendations): A Movie recommendation application
 [ ] - [Travel Agent](./travel-agent): A travel agent
+[ ] - [Investment Agent](./investment-agent): A financial advisor
+[ ] - [Personal Financial Agent](./personal-finance): A personal financial agent
 
-## Tech Stack
+## Inspiration
 
-- Framework - [Next.js (App Router)](https://nextjs.org)
-- Language - [TypeScript](https://www.typescriptlang.org)
-- Styling - [Tailwind CSS](https://tailwindcss.com)
-- UI Components - [Shadcn UI](https://ui.shadcn.com/)
-- AI - [Vercel AI](https://vercel.com/ai)
+- [Deploying AI](https://github.com/christianrice/ai-demos)
+- [Awsome LLM Apps](https://github.com/Shubhamsaboo/awesome-llm-apps)
 
 ## License
 
