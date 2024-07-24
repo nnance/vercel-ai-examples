@@ -7,6 +7,7 @@ An AI playground to experiment with AI: Model selection, text generation, stream
 - Styling - [Tailwind CSS](https://tailwindcss.com)
 - Components - [Shadcn UI](https://ui.shadcn.com/)
 - Formatting - [Prettier](https://prettier.io)
+- AI - [Vercel AI](https://vercel.com/ai)
 
 ## Getting Started
 
@@ -32,6 +33,11 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 [x] Setup the project
 [x] Add shadcn UI
+[x] Add Vercel AI
+[ ] Rename chat page and chat panel
+[ ] Improve layout with input and output panes
+[ ] Add icons to chat log
+[ ] Add model selection
 [ ] Add pages for all nav items
 [ ] Support local and remote inference servers with model selection
 [ ] Text generation
