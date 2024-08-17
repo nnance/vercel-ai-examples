@@ -1,70 +1,72 @@
 "use client";
 
+import { Bird, Rabbit, Turtle } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@radix-ui/react-tooltip";
-import { Paperclip, Mic, CornerDownLeft } from "lucide-react";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import ChatPanel from "@/components/chat-panel";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { useState } from "react";
 
-import { useChat } from "ai/react";
-import { ChatMessage } from "./chat-message";
+interface ChatProps {
+  defaultLayout?: number[] | undefined;
+  defaultCollapsed?: boolean;
+  navCollapsedSize?: number;
+}
 
-export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
+export default function Chat({
+  defaultLayout = [32, 48],
+  defaultCollapsed = false,
+  navCollapsedSize = 10,
+}: ChatProps) {
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+
   return (
-    <div className="relative flex h-full min-h-[50vh] flex-col rounded-xl bg-muted/50 p-4 lg:col-span-2">
-      <Badge variant="outline" className="absolute right-3 top-3">
-        Output
-      </Badge>
-      <div className="flex-1" />
-      {messages.map((m) => (
-        <ChatMessage key={m.id} message={m} />
-      ))}
-      <form
-        className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
-        x-chunk="dashboard-03-chunk-1"
-        onSubmit={handleSubmit}
-      >
-        <Label htmlFor="message" className="sr-only">
-          Message
-        </Label>
-        <Textarea
-          id="message"
-          placeholder="Type your message here..."
-          className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
-          value={input}
-          onChange={handleInputChange}
-        />
-        <div className="flex items-center p-3 pt-0">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Paperclip className="size-4" />
-                <span className="sr-only">Attach file</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Attach File</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Mic className="size-4" />
-                <span className="sr-only">Use Microphone</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Use Microphone</TooltipContent>
-          </Tooltip>
-          <Button type="submit" size="sm" className="ml-auto gap-1.5">
-            Send Message
-            <CornerDownLeft className="size-3.5" />
-          </Button>
-        </div>
-      </form>
-    </div>
+    <ResizablePanelGroup
+      direction="horizontal"
+      onLayout={(sizes: number[]) => {
+        document.cookie = `react-resizable-panels:layout:mail=${JSON.stringify(
+          sizes
+        )}`;
+      }}
+      className="h-full max-h-[800px] items-stretch"
+    >
+      <ResizablePanel
+        defaultSize={defaultLayout[0]}
+        collapsedSize={navCollapsedSize}
+        collapsible={true}
+        minSize={15}
+        maxSize={20}
+        onCollapse={() => {
+          setIsCollapsed(true);
+          document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
+            true
+          )}`;
+        }}
+        onResize={() => {
+          setIsCollapsed(false);
+          document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
+            false
+          )}`;
+        }}
+        className={cn(
+          isCollapsed && "min-w-[50px] transition-all duration-300 ease-in-out"
+        )}
+      ></ResizablePanel>
+      <ResizablePanel
+        defaultSize={defaultLayout[1]}
+        minSize={15}
+        maxSize={20}
+      ></ResizablePanel>
+    </ResizablePanelGroup>
   );
 }

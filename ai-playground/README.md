@@ -38,6 +38,9 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 [ ] Improve layout with input and output panes
 [ ] Add icons to chat log
 [ ] Add model selection
+[ ] Add groq
+[ ] Add ollama
+[ ] Add Vertex
 [ ] Add pages for all nav items
 [ ] Support local and remote inference servers with model selection
 [ ] Text generation
