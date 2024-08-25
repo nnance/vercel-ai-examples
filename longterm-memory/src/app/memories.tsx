@@ -4,16 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { X } from "lucide-react";
 
-interface Memory {
+export interface Memory {
   knowledge: string;
   category: "ATTRIBUTE" | "ACTION";
 }
 
-export function Memories() {
-  const memories: Memory[] = [
-    { knowledge: "I am a vegetarian", category: "ATTRIBUTE" },
-    { knowledge: "Wife is a vegetarian", category: "ATTRIBUTE" },
-  ];
+export interface MemoryProps {
+  memories: Memory[];
+}
+
+export function Memories(props: MemoryProps) {
+  const { memories } = props;
 
   const renderMemory = (memory: Memory, index: number) => {
     return (

@@ -1,68 +1,23 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-interface MemoryAction {
+export interface MemoryAction {
   knowledge: string;
   action?: "CREATE" | "UPDATE" | "DELETE";
   category?: "ATTRIBUTE" | "ACTION";
 }
 
-interface Agent {
+export interface Agent {
   name: string;
   messages: string[];
   memories: MemoryAction[];
 }
 
-export function MemoryExtraction() {
-  const agents: Agent[] = [
-    {
-      name: "Sentinel",
-      messages: ["Message contains information."],
-      memories: [],
-    },
-    {
-      name: "Memory Extractor",
-      messages: [
-        'Memory extraction results from attempt #1: "Wife is a vegetarian", "I am a vegetarian"',
-      ],
-      memories: [
-        { knowledge: "Wife is a vegetarian" },
-        { knowledge: "I am a vegetarian" },
-      ],
-    },
-    {
-      name: "Memory Reviewer",
-      messages: ["AI analysis is perfect."],
-      memories: [],
-    },
-    {
-      name: "Action Assigner",
-      messages: [
-        'Added actions: {"memories": [{"knowledge": "I am a vegetarian", "action": "CREATE"}, {"knowledge": "Wife is a vegetarian", "action": "CREATE"}]',
-      ],
-      memories: [
-        { knowledge: "I am a vegetarian", action: "CREATE" },
-        { knowledge: "Wife is a vegetarian", action: "CREATE" },
-      ],
-    },
-    {
-      name: "Category Assigner",
-      messages: [
-        'Added categories: {"memories": [{"knowledge": "I am a vegetarian", "category": "ATTRIBUTE", "action": "CREATE"}, {"knowledge": "Wife is a vegetarian", "category": "ATTRIBUTE", "action": "CREATE"}]',
-      ],
-      memories: [
-        {
-          knowledge: "I am a vegetarian",
-          category: "ATTRIBUTE",
-          action: "CREATE",
-        },
-        {
-          knowledge: "Wife is a vegetarian",
-          category: "ATTRIBUTE",
-          action: "CREATE",
-        },
-      ],
-    },
-  ];
+export interface MemoryExtractionProps {
+  agents: Agent[];
+}
+
+export function MemoryExtraction(props: MemoryExtractionProps) {
+  const { agents } = props;
 
   const renderAgent = (agent: Agent, index: number) => {
     return (

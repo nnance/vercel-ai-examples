@@ -3,19 +3,17 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MessageCircle } from "lucide-react";
 
-interface ChatMessage {
+export interface ChatMessage {
   text: string;
   sender: "user" | "chef";
 }
 
-export function Chat() {
-  const messages: ChatMessage[] = [
-    { text: "My wife and I are vegetarian.", sender: "user" },
-    {
-      text: "Got it! So, you and your wife are both vegetarian. Now, do either of you have any allergies that I should be aware of?",
-      sender: "chef",
-    },
-  ];
+export interface ChatProps {
+  messages: ChatMessage[];
+}
+
+export function Chat(props: ChatProps) {
+  const { messages } = props;
 
   const renderMessage = (message: ChatMessage, index: number) => {
     return (
