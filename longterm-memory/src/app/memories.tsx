@@ -4,7 +4,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { X } from "lucide-react";
 
+interface Memory {
+  knowledge: string;
+  category: "ATTRIBUTE" | "ACTION";
+}
+
 export function Memories() {
+  const memories: Memory[] = [
+    { knowledge: "I am a vegetarian", category: "ATTRIBUTE" },
+    { knowledge: "Wife is a vegetarian", category: "ATTRIBUTE" },
+  ];
+
+  const renderMemory = (memory: Memory, index: number) => {
+    return (
+      <div key={index} className="flex justify-between items-center">
+        <Badge>{memory.category}</Badge>
+        <span className="text-sm">{memory.knowledge}</span>
+        <Button variant="ghost" size="icon">
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <div className="md:col-span-1 overflow-y-auto h-full">
       <Card>
@@ -12,21 +34,7 @@ export function Memories() {
           <CardTitle className="text-lg">Long-Term Memories</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Badge>Attribute</Badge>
-            <span className="text-sm">I am a vegetarian</span>
-            <Button variant="ghost" size="icon">
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <Separator />
-          <div className="flex justify-between items-center">
-            <Badge>Attribute</Badge>
-            <span className="text-sm">Wife is a vegetarian</span>
-            <Button variant="ghost" size="icon">
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          {memories.map(renderMemory)}
         </CardContent>
       </Card>
     </div>
