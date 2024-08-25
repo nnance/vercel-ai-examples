@@ -1,13 +1,16 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Agent, MemoryExtraction } from "./memory-extraction";
 import { Memories, Memory } from "./memories";
 import { Chat, ChatMessage } from "./chat";
+import { useState } from "react";
 
 const messages: ChatMessage[] = [
-  { text: "My wife and I are vegetarian.", sender: "user" },
+  { text: "My wife and I are vegetarian.", sender: "USER" },
   {
     text: "Got it! So, you and your wife are both vegetarian. Now, do either of you have any allergies that I should be aware of?",
-    sender: "chef",
+    sender: "CHEF",
   },
 ];
 
@@ -67,15 +70,39 @@ const memories: Memory[] = [
   { knowledge: "Wife is a vegetarian", category: "ATTRIBUTE" },
 ];
 
+interface State {
+  messages: ChatMessage[];
+  agents: Agent[];
+  memories: Memory[];
+}
+
+const defaultState: State = {
+  messages,
+  agents,
+  memories,
+};
+
 export default function Component() {
+  const [{ messages, memories, agents }, setState] =
+    useState<State>(defaultState);
+
+  const deleteMemory = (index: number) => {
+    const newMemories = memories.filter((_, i) => i !== index);
+    setState((state) => ({ ...state, memories: newMemories }));
+  };
+
+  const sendMessage = (message: ChatMessage) => {
+    setState((state) => ({ ...state, messages: [...state.messages, message] }));
+  };
+
   return (
     <div className="w-full h-screen bg-gray-100 p-0">
       <Card className="w-full h-full rounded-none">
         <CardContent className="p-4 h-[calc(100vh-5rem)]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-full">
-            <Chat messages={messages} />
+            <Chat messages={messages} sendMessage={sendMessage} />
             <MemoryExtraction agents={agents} />
-            <Memories memories={memories} />
+            <Memories memories={memories} deleteMemory={deleteMemory} />
           </div>
         </CardContent>
       </Card>

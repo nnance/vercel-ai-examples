@@ -11,10 +11,11 @@ export interface Memory {
 
 export interface MemoryProps {
   memories: Memory[];
+  deleteMemory: (index: number) => void;
 }
 
 export function Memories(props: MemoryProps) {
-  const { memories } = props;
+  const { memories, deleteMemory } = props;
 
   const renderMemory = (memory: Memory, index: number) => {
     return (
@@ -22,7 +23,7 @@ export function Memories(props: MemoryProps) {
         <Badge>{memory.category}</Badge>
         <span className="text-sm">{memory.knowledge}</span>
         <Button variant="ghost" size="icon">
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" onClick={() => deleteMemory(index)} />
         </Button>
       </div>
     );
