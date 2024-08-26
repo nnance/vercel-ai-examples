@@ -5,53 +5,47 @@ import { MemoryExtraction } from "./memory-extraction";
 import { Memories, Memory } from "./memories";
 import { Chat, ChatMessage } from "./chat";
 import { useState } from "react";
-import { AgentEvent, cookingAssistant } from "@/ai/assistant";
-
-const memories: Memory[] = [
-  { knowledge: "I am a vegetarian", category: "ATTRIBUTE" },
-  { knowledge: "Wife is a vegetarian", category: "ATTRIBUTE" },
-];
-
-interface State {
-  messages: ChatMessage[];
-  memories: Memory[];
-}
-
-const defaultState: State = {
-  messages: [],
-  memories,
-};
+import { cookingAssistant } from "@/ai/assistant";
+import { AgentEvent, MemoryAction } from "@/ai/interfaces";
 
 export default function Component() {
-  const [{ messages, memories }, setState] = useState<State>(defaultState);
-
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [memories, setMemories] = useState<Memory[]>([]);
   const [events, setEvents] = useState<AgentEvent[]>([]);
-
-  const addMemory = (memory: Memory) => {
-    setState((state) => ({ ...state, memories: [...state.memories, memory] }));
-  };
 
   const deleteMemory = (index: number) => {
     const newMemories = memories.filter((_, i) => i !== index);
-    setState((state) => ({ ...state, memories: newMemories }));
+    setMemories(newMemories);
+  };
+
+  const handleAgentEvent = (event: AgentEvent) => {
+    if (event.name === "ASSISTANT") {
+      const newMessage: ChatMessage = {
+        text: event.messages[0],
+        sender: "CHEF",
+      };
+      setMessages((messages) => [...messages, newMessage]);
+    } else {
+      setEvents((events) => [...events, event]);
+    }
+  };
+
+  const handleMemoryExtraction = (action: MemoryAction) => {
+    const memory: Memory = {
+      knowledge: action.knowledge,
+      category: action.category!,
+    };
+
+    if (action.action === "DELETE") {
+      deleteMemory(memories.findIndex((m) => m.knowledge === action.knowledge));
+    } else {
+      setMemories((memories) => [...memories, memory]);
+    }
   };
 
   const sendMessage = (message: ChatMessage) => {
-    setState((state) => ({ ...state, messages: [...state.messages, message] }));
-    cookingAssistant(message.text, (event) => {
-      if (event.name === "ASSISTANT") {
-        const newMessage: ChatMessage = {
-          text: event.messages[0],
-          sender: "CHEF",
-        };
-        setState((state) => ({
-          ...state,
-          messages: [...state.messages, newMessage],
-        }));
-      } else {
-        setEvents((events) => [...events, event]);
-      }
-    });
+    setMessages((messages) => [...messages, message]);
+    cookingAssistant(message.text, handleAgentEvent, handleMemoryExtraction);
   };
 
   return (

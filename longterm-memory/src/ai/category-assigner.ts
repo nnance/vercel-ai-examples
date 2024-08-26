@@ -1,15 +1,9 @@
-import { ActionAssignerResults } from "./action-assigner";
+import { MemoryAction } from "./interfaces";
 import { LLMChatMessage } from "./llm";
-
-interface CategoryAssignerResults {
-  knowledge: string;
-  action: "CREATE" | "UPDATE" | "DELETE";
-  category: "ATTRIBUTE" | "ACTION";
-}
 
 export const categoryAssigner =
   (message: LLMChatMessage) =>
-  (memoryWithActions: ActionAssignerResults[]): CategoryAssignerResults[] => {
+  (memoryWithActions: MemoryAction[]): MemoryAction[] => {
     return message.text.includes("vegetarian") && memoryWithActions.length === 2
       ? memoryWithActions.map((memory) => ({
           ...memory,

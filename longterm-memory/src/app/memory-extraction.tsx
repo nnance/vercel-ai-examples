@@ -1,4 +1,4 @@
-import { AgentEvent } from "@/ai/assistant";
+import { AgentEvent } from "@/ai/interfaces";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export interface MemoryExtractionProps {

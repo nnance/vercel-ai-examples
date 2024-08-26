@@ -1,32 +1,15 @@
 import { actionAssigner } from "./action-assigner";
 import { categoryAssigner } from "./category-assigner";
+import { AgentEvent, MemoryAction } from "./interfaces";
 import { chatCompletion } from "./llm";
 import { extractMemory } from "./memory-extractor";
 import { checkMemoryExtraction } from "./memory-reviewer";
 import { sentinalCheck } from "./sentinal";
 
-export interface MemoryAction {
-  knowledge: string;
-  action?: "CREATE" | "UPDATE" | "DELETE";
-  category?: "ATTRIBUTE" | "ACTION";
-}
-
-export interface AgentEvent {
-  name:
-    | "USER"
-    | "ASSISTANT"
-    | "SENTINEL"
-    | "MEMORY_EXTRACTOR"
-    | "MEMORY_REVIEWER"
-    | "ACTION_ASSIGNER"
-    | "CATEGORY_ASSIGNER";
-  messages: string[];
-  actions: MemoryAction[];
-}
-
 export function cookingAssistant(
   message: string,
-  notify: (event: AgentEvent) => void
+  notify: (event: AgentEvent) => void,
+  action: (action: MemoryAction) => void
 ) {
   const llmMessage = chatCompletion({
     text: message,
@@ -84,4 +67,7 @@ export function cookingAssistant(
     messages: ["Added categories: " + JSON.stringify(categories)],
     actions: memoryCategories,
   });
+
+  // process memory actions
+  memoryCategories.forEach(action);
 }
