@@ -1,34 +1,28 @@
+import { AgentEvent } from "@/ai/assistant";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-export interface MemoryAction {
-  knowledge: string;
-  action?: "CREATE" | "UPDATE" | "DELETE";
-  category?: "ATTRIBUTE" | "ACTION";
-}
-
-export interface Agent {
-  name: string;
-  messages: string[];
-  memories: MemoryAction[];
-}
-
 export interface MemoryExtractionProps {
-  agents: Agent[];
+  events: AgentEvent[];
 }
 
 export function MemoryExtraction(props: MemoryExtractionProps) {
-  const { agents } = props;
+  const { events } = props;
 
-  const renderAgent = (agent: Agent, index: number) => {
+  const renderEvent = (
+    { name, messages, actions }: AgentEvent,
+    index: number
+  ) => {
     return (
       <div className="space-y-1" key={index}>
-        <h4 className="font-semibold text-orange-500">{agent.name}</h4>
-        {agent.messages.map((message, index) => (
+        <h4 className="font-semibold text-orange-500">
+          {name.replace(/_/g, " ")}
+        </h4>
+        {messages.map((message, index) => (
           <p key={index} className="text-sm">
             {message}
           </p>
         ))}
-        {agent.memories.map((memory, index) => (
+        {actions.map((memory, index) => (
           <p key={index} className="text-sm">
             {`Memory ${index + 1}: ${JSON.stringify(memory)}`}
           </p>
@@ -44,7 +38,7 @@ export function MemoryExtraction(props: MemoryExtractionProps) {
           <CardTitle className="text-lg">Memory Extraction Agent</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="space-y-2">{agents.map(renderAgent)}</div>
+          <div className="space-y-2">{events.map(renderEvent)}</div>
         </CardContent>
       </Card>
     </div>

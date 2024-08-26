@@ -1,69 +1,11 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Agent, MemoryExtraction } from "./memory-extraction";
+import { MemoryExtraction } from "./memory-extraction";
 import { Memories, Memory } from "./memories";
 import { Chat, ChatMessage } from "./chat";
 import { useState } from "react";
-
-const messages: ChatMessage[] = [
-  { text: "My wife and I are vegetarian.", sender: "USER" },
-  {
-    text: "Got it! So, you and your wife are both vegetarian. Now, do either of you have any allergies that I should be aware of?",
-    sender: "CHEF",
-  },
-];
-
-const agents: Agent[] = [
-  {
-    name: "Sentinel",
-    messages: ["Message contains information."],
-    memories: [],
-  },
-  {
-    name: "Memory Extractor",
-    messages: [
-      'Memory extraction results from attempt #1: "Wife is a vegetarian", "I am a vegetarian"',
-    ],
-    memories: [
-      { knowledge: "Wife is a vegetarian" },
-      { knowledge: "I am a vegetarian" },
-    ],
-  },
-  {
-    name: "Memory Reviewer",
-    messages: ["AI analysis is perfect."],
-    memories: [],
-  },
-  {
-    name: "Action Assigner",
-    messages: [
-      'Added actions: {"memories": [{"knowledge": "I am a vegetarian", "action": "CREATE"}, {"knowledge": "Wife is a vegetarian", "action": "CREATE"}]',
-    ],
-    memories: [
-      { knowledge: "I am a vegetarian", action: "CREATE" },
-      { knowledge: "Wife is a vegetarian", action: "CREATE" },
-    ],
-  },
-  {
-    name: "Category Assigner",
-    messages: [
-      'Added categories: {"memories": [{"knowledge": "I am a vegetarian", "category": "ATTRIBUTE", "action": "CREATE"}, {"knowledge": "Wife is a vegetarian", "category": "ATTRIBUTE", "action": "CREATE"}]',
-    ],
-    memories: [
-      {
-        knowledge: "I am a vegetarian",
-        category: "ATTRIBUTE",
-        action: "CREATE",
-      },
-      {
-        knowledge: "Wife is a vegetarian",
-        category: "ATTRIBUTE",
-        action: "CREATE",
-      },
-    ],
-  },
-];
+import { AgentEvent, cookingAssistant } from "@/ai/assistant";
 
 const memories: Memory[] = [
   { knowledge: "I am a vegetarian", category: "ATTRIBUTE" },
@@ -72,19 +14,22 @@ const memories: Memory[] = [
 
 interface State {
   messages: ChatMessage[];
-  agents: Agent[];
   memories: Memory[];
 }
 
 const defaultState: State = {
-  messages,
-  agents,
+  messages: [],
   memories,
 };
 
 export default function Component() {
-  const [{ messages, memories, agents }, setState] =
-    useState<State>(defaultState);
+  const [{ messages, memories }, setState] = useState<State>(defaultState);
+
+  const [events, setEvents] = useState<AgentEvent[]>([]);
+
+  const addMemory = (memory: Memory) => {
+    setState((state) => ({ ...state, memories: [...state.memories, memory] }));
+  };
 
   const deleteMemory = (index: number) => {
     const newMemories = memories.filter((_, i) => i !== index);
@@ -93,6 +38,20 @@ export default function Component() {
 
   const sendMessage = (message: ChatMessage) => {
     setState((state) => ({ ...state, messages: [...state.messages, message] }));
+    cookingAssistant(message.text, (event) => {
+      if (event.name === "ASSISTANT") {
+        const newMessage: ChatMessage = {
+          text: event.messages[0],
+          sender: "CHEF",
+        };
+        setState((state) => ({
+          ...state,
+          messages: [...state.messages, newMessage],
+        }));
+      } else {
+        setEvents((events) => [...events, event]);
+      }
+    });
   };
 
   return (
@@ -101,7 +60,7 @@ export default function Component() {
         <CardContent className="p-4 h-[calc(100vh-5rem)]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-full">
             <Chat messages={messages} sendMessage={sendMessage} />
-            <MemoryExtraction agents={agents} />
+            <MemoryExtraction events={events} />
             <Memories memories={memories} deleteMemory={deleteMemory} />
           </div>
         </CardContent>
