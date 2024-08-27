@@ -4,70 +4,84 @@ import { AgentEvent, MemoryAction } from "./interfaces";
 import { chatCompletion } from "./llm";
 import { extractMemory } from "./memory-extractor";
 import { checkMemoryExtraction } from "./memory-reviewer";
-import { sentinalCheck } from "./sentinal";
+import { sentinalCheck, SentinalResult } from "./sentinal";
 
-export function cookingAssistant(
-  message: string,
-  notify: (event: AgentEvent) => void,
-  action: (action: MemoryAction) => void
-) {
+export function cookingAssistant({
+  message,
+  response,
+  notify,
+  action,
+}: {
+  message: string;
+  response?: (response: string) => void;
+  notify?: (event: AgentEvent) => void;
+  action?: (action: MemoryAction) => void;
+}) {
   const llmMessage = chatCompletion({
     text: message,
     sender: "USER",
   });
-  notify({
-    name: "ASSISTANT",
-    messages: [llmMessage.text],
-    actions: [],
-  });
+  if (response) {
+    response(llmMessage.text);
+  }
 
   // sentinal check
   const sentinalMessage = sentinalCheck(message);
-  notify({
-    name: "SENTINEL",
-    messages: [sentinalMessage.message],
-    actions: [],
-  });
+  if (notify) {
+    notify({
+      name: "SENTINEL",
+      containsInformation: sentinalMessage.containsInformation,
+      extractionSuccessful: false,
+      actions: [],
+    });
+  }
 
   // memory extraction
   const memoryExtraction = extractMemory(message)(sentinalMessage);
-  const memories = memoryExtraction.reduce((acc, memory, idx) => {
-    return idx < memoryExtraction.length - 1
-      ? acc + `"${memory.knowledge}", `
-      : acc + `"${memory.knowledge}"`;
-  }, "");
-  notify({
-    name: "MEMORY_EXTRACTOR",
-    messages: [`Memory extraction results from attempt #1: ${memories}`],
-    actions: memoryExtraction,
-  });
+  if (notify) {
+    notify({
+      name: "MEMORY_EXTRACTOR",
+      containsInformation: true,
+      extractionSuccessful: false,
+      actions: memoryExtraction,
+    });
+  }
 
   // memory review
   const memoryReview = checkMemoryExtraction(llmMessage)(memoryExtraction);
-  notify({
-    name: "MEMORY_REVIEWER",
-    messages: [memoryReview.message],
-    actions: [],
-  });
+  if (notify) {
+    notify({
+      name: "MEMORY_REVIEWER",
+      containsInformation: true,
+      extractionSuccessful: memoryReview.extractionSuccessful,
+      actions: [],
+    });
+  }
 
   // action assigner
   const memoryActions = actionAssigner(llmMessage)(memoryExtraction);
-  const actions = { memories: memoryActions };
-  notify({
-    name: "ACTION_ASSIGNER",
-    messages: ["Added actions: " + JSON.stringify(actions)],
-    actions: memoryActions,
-  });
+  if (notify) {
+    notify({
+      name: "ACTION_ASSIGNER",
+      containsInformation: true,
+      extractionSuccessful: true,
+      actions: memoryActions,
+    });
+  }
 
   // category assigner
   const memoryCategories = categoryAssigner(llmMessage)(memoryActions);
-  const categories = { memories: memoryCategories };
-  notify({
-    name: "CATEGORY_ASSIGNER",
-    messages: ["Added categories: " + JSON.stringify(categories)],
-    actions: memoryCategories,
-  });
+  if (notify) {
+    notify({
+      name: "CATEGORY_ASSIGNER",
+      containsInformation: true,
+      extractionSuccessful: true,
+      actions: memoryCategories,
+    });
+  }
 
   // process memory actions
-  memoryCategories.forEach(action);
+  if (action) {
+    memoryCategories.forEach(action);
+  }
 }

@@ -1,29 +1,70 @@
-import { AgentEvent } from "@/ai/interfaces";
+import { AgentEvent, MemoryAction } from "@/ai/interfaces";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export interface MemoryExtractionProps {
   events: AgentEvent[];
 }
 
+function renderSentinelMessage(containsInformation: boolean) {
+  if (containsInformation) {
+    return "Message contains information.";
+  } else {
+    return "No information found.";
+  }
+}
+
+function memoryExtractionMessage(actions: MemoryAction[]) {
+  const memories = actions.reduce((acc, memory, idx) => {
+    return idx < actions.length - 1
+      ? acc + `"${memory.knowledge}", `
+      : acc + `"${memory.knowledge}"`;
+  }, "");
+  return `Memory extraction results from attempt #1: ${memories}`;
+}
+
+function memoryReviewMessage(extractionSuccessful: boolean) {
+  return extractionSuccessful
+    ? "Memory extraction successful."
+    : "Memory extraction failed.";
+}
+
+function memoryActionAssignerMessage(actions: MemoryAction[]) {
+  return "Added actions: " + JSON.stringify(actions);
+}
+
+function memoryCategoryAssignerMessage(actions: MemoryAction[]) {
+  return "Added categories: " + JSON.stringify(actions);
+}
+
+// a function that checks the type of the event and renders the appropriate message
+export function renderEventMessage(event: AgentEvent) {
+  if (event.name === "SENTINEL") {
+    return renderSentinelMessage(event.containsInformation);
+  } else if (event.name === "MEMORY_EXTRACTOR") {
+    return memoryExtractionMessage(event.actions);
+  } else if (event.name === "MEMORY_REVIEWER") {
+    return memoryReviewMessage(event.extractionSuccessful);
+  } else if (event.name === "ACTION_ASSIGNER") {
+    return memoryActionAssignerMessage(event.actions);
+  } else if (event.name === "CATEGORY_ASSIGNER") {
+    return memoryCategoryAssignerMessage(event.actions);
+  }
+}
+
 export function MemoryExtraction(props: MemoryExtractionProps) {
   const { events } = props;
 
-  const renderEvent = (
-    { name, messages, actions }: AgentEvent,
-    index: number
-  ) => {
+  const renderEvent = (event: AgentEvent, index: number) => {
     return (
       <div className="space-y-1" key={index}>
         <h4 className="font-semibold text-orange-500">
-          {name.replace(/_/g, " ")}
+          {event.name.replace(/_/g, " ")}
         </h4>
-        {messages.map((message, index) => (
-          <p key={index} className="text-sm">
-            {message}
-          </p>
-        ))}
-        {actions.map((memory, index) => (
-          <p key={index} className="text-sm">
+        <p key={index} className="text-sm">
+          {renderEventMessage(event)}
+        </p>
+        {event.actions.map((memory, index) => (
+          <p key={index} className="text-sm text-gray-500">
             {`Memory ${index + 1}: ${JSON.stringify(memory)}`}
           </p>
         ))}

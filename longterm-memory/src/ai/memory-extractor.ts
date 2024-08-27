@@ -1,13 +1,9 @@
-import { LLMChatMessage } from "./llm";
+import { MemoryAction } from "./interfaces";
 import { SentinalResult } from "./sentinal";
-
-export interface ExtractedMemory {
-  knowledge: string;
-}
 
 export const extractMemory =
   (message: string) =>
-  (result: SentinalResult): ExtractedMemory[] => {
+  (result: SentinalResult): MemoryAction[] => {
     return message.includes("vegetarian") && result.containsInformation
       ? [
           {

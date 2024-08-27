@@ -18,16 +18,16 @@ export default function Component() {
     setMemories(newMemories);
   };
 
+  const handleLLMResponse = (response: string) => {
+    const newMessage: ChatMessage = {
+      text: response,
+      sender: "CHEF",
+    };
+    setMessages((messages) => [...messages, newMessage]);
+  };
+
   const handleAgentEvent = (event: AgentEvent) => {
-    if (event.name === "ASSISTANT") {
-      const newMessage: ChatMessage = {
-        text: event.messages[0],
-        sender: "CHEF",
-      };
-      setMessages((messages) => [...messages, newMessage]);
-    } else {
-      setEvents((events) => [...events, event]);
-    }
+    setEvents((events) => [...events, event]);
   };
 
   const handleMemoryExtraction = (action: MemoryAction) => {
@@ -45,7 +45,12 @@ export default function Component() {
 
   const sendMessage = (message: ChatMessage) => {
     setMessages((messages) => [...messages, message]);
-    cookingAssistant(message.text, handleAgentEvent, handleMemoryExtraction);
+    cookingAssistant({
+      message: message.text,
+      response: handleLLMResponse,
+      notify: handleAgentEvent,
+      action: handleMemoryExtraction,
+    });
   };
 
   return (

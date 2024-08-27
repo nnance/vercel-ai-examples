@@ -7,7 +7,8 @@ export interface AgentEvent {
     | "MEMORY_REVIEWER"
     | "ACTION_ASSIGNER"
     | "CATEGORY_ASSIGNER";
-  messages: string[];
+  containsInformation: boolean;
+  extractionSuccessful: boolean;
   actions: MemoryAction[];
 }
 
