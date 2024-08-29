@@ -1,3 +1,6 @@
+import { generateText } from "ai";
+import { createOpenAI as createGroq } from "@ai-sdk/openai";
+
 export interface LLMChatMessage {
   text: string;
   sender:
@@ -9,12 +12,21 @@ export interface LLMChatMessage {
     | "ACTION_ASSIGNER"
     | "CATEGORY_ASSIGNER";
 }
+export async function chatCompletion(
+  message: LLMChatMessage
+): Promise<LLMChatMessage> {
+  const groq = createGroq({
+    baseURL: "https://api.groq.com/openai/v1",
+    apiKey: process.env.GROQ_API_KEY,
+  });
 
-export function chatCompletion(message: LLMChatMessage): LLMChatMessage {
-  return message.text.includes("vegetarian")
-    ? {
-        text: "Got it! So, you and your wife are both vegetarian. Now, do either of you have any allergies that I should be aware of?",
-        sender: "ASSISTANT",
-      }
-    : { text: "Got it! Anything else I should know?", sender: "ASSISTANT" };
+  const { text } = await generateText({
+    model: groq("llama3-groq-70b-8192-tool-use-preview"),
+    prompt: message.text,
+  });
+
+  return {
+    text,
+    sender: "ASSISTANT",
+  };
 }

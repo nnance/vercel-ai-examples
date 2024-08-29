@@ -8,7 +8,7 @@ import { sentinalCheck, SentinalResult } from "./sentinal";
 
 const numExtractionAttempts = 3;
 
-export function cookingAssistant({
+export async function cookingAssistant({
   message,
   response,
   notify,
@@ -19,7 +19,7 @@ export function cookingAssistant({
   notify?: (event: AgentEvent) => void;
   action?: (action: MemoryAction) => void;
 }) {
-  const llmMessage = chatCompletion({
+  const llmMessage = await chatCompletion({
     text: message,
     sender: "USER",
   });
