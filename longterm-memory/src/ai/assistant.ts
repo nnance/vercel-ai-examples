@@ -6,6 +6,8 @@ import { extractMemory } from "./memory-extractor";
 import { checkMemoryExtraction } from "./memory-reviewer";
 import { sentinalCheck, SentinalResult } from "./sentinal";
 
+const numExtractionAttempts = 3;
+
 export function cookingAssistant({
   message,
   response,
@@ -36,26 +38,43 @@ export function cookingAssistant({
     });
   }
 
-  // memory extraction
-  const memoryExtraction = extractMemory(message)(sentinalMessage);
-  if (notify) {
-    notify({
-      name: "MEMORY_EXTRACTOR",
-      containsInformation: true,
-      extractionSuccessful: false,
-      actions: memoryExtraction,
-    });
+  if (!sentinalMessage.containsInformation) {
+    return;
   }
 
-  // memory review
-  const memoryReview = checkMemoryExtraction(llmMessage)(memoryExtraction);
-  if (notify) {
-    notify({
-      name: "MEMORY_REVIEWER",
-      containsInformation: true,
-      extractionSuccessful: memoryReview.extractionSuccessful,
-      actions: [],
-    });
+  // memory extraction
+  let extractionAttempts = 0;
+  let extractionSuccessful = false;
+  let memoryExtraction;
+
+  while (extractionAttempts < numExtractionAttempts && !extractionSuccessful) {
+    memoryExtraction = extractMemory(message)(sentinalMessage);
+    if (notify) {
+      notify({
+        name: "MEMORY_EXTRACTOR",
+        containsInformation: true,
+        extractionSuccessful: false,
+        actions: memoryExtraction,
+      });
+    }
+
+    // memory review
+    const memoryReview = checkMemoryExtraction(llmMessage)(memoryExtraction);
+    if (notify) {
+      notify({
+        name: "MEMORY_REVIEWER",
+        containsInformation: true,
+        extractionSuccessful: memoryReview.extractionSuccessful,
+        actions: [],
+      });
+    }
+
+    extractionSuccessful = memoryReview.extractionSuccessful;
+    extractionAttempts++;
+  }
+
+  if (!memoryExtraction) {
+    return;
   }
 
   // action assigner

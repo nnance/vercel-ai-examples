@@ -68,7 +68,7 @@ export function Chat(props: ChatProps) {
         <CardHeader>
           <CardTitle className="text-lg">Cooking Assistant</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="flex flex-col justify-between h-full space-y-2">
           <div
             className="flex-grow overflow-y-auto mb-4 space-y-4"
             aria-label="Chat messages"
