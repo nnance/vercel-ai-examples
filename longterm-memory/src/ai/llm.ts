@@ -14,8 +14,8 @@ export interface LLMChatMessage {
     | "CATEGORY_ASSIGNER";
 }
 
-function getProvider() {
-  if (process.env.PROVIDER === "groq") {
+export function getProvider(providerName?: string) {
+  if (providerName === "groq") {
     return createGroq({
       baseURL: "https://api.groq.com/openai/v1",
       apiKey: process.env.GROQ_API_KEY,
@@ -28,8 +28,8 @@ function getProvider() {
   }
 }
 
-function getModelName() {
-  if (process.env.PROVIDER === "groq") {
+export function getModelName(providerName?: string) {
+  if (providerName === "groq") {
     return process.env.GROQ_MODEL!;
   } else {
     return process.env.LOCAL_MODEL!;
@@ -39,8 +39,8 @@ function getModelName() {
 export async function chatCompletion(
   message: LLMChatMessage
 ): Promise<LLMChatMessage> {
-  const provider = getProvider();
-  const modelName = getModelName();
+  const provider = getProvider(process.env.PROVIDER);
+  const modelName = getModelName(process.env.PROVIDER);
   const model = provider(modelName);
 
   const { text } = await generateText({

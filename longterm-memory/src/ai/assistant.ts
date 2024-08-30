@@ -28,7 +28,7 @@ export async function cookingAssistant({
   }
 
   // sentinal check
-  const sentinalMessage = sentinalCheck(message);
+  const sentinalMessage = await sentinalCheck(message);
   if (notify) {
     notify({
       name: "SENTINEL",
