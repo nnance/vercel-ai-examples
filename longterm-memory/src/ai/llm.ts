@@ -18,7 +18,7 @@ export function getProvider(providerName?: string) {
   if (providerName === "groq") {
     return createGroq({
       baseURL: "https://api.groq.com/openai/v1",
-      apiKey: process.env.GROQ_API_KEY,
+      apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
     });
   } else {
     return createOllama({
@@ -30,17 +30,17 @@ export function getProvider(providerName?: string) {
 
 export function getModelName(providerName?: string) {
   if (providerName === "groq") {
-    return process.env.GROQ_MODEL!;
+    return process.env.NEXT_PUBLIC_GROQ_MODEL!;
   } else {
-    return process.env.LOCAL_MODEL!;
+    return process.env.NEXT_PUBLIC_LOCAL_MODEL!;
   }
 }
 
 export async function chatCompletion(
   message: LLMChatMessage
 ): Promise<LLMChatMessage> {
-  const provider = getProvider(process.env.PROVIDER);
-  const modelName = getModelName(process.env.PROVIDER);
+  const provider = getProvider(process.env.NEXT_PUBLIC_PROVIDER);
+  const modelName = getModelName(process.env.NEXT_PUBLIC_PROVIDER);
   const model = provider(modelName);
 
   const { text } = await generateText({
