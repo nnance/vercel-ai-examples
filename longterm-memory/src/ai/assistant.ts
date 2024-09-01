@@ -4,7 +4,7 @@ import { AgentEvent, MemoryAction } from "./interfaces";
 import { chatCompletion } from "./llm";
 import { extractMemory } from "./memory-extractor";
 import { checkMemoryExtraction } from "./memory-reviewer";
-import { sentinalCheck, SentinalResult } from "./sentinal";
+import { sentinalCheck } from "./sentinal";
 
 const numExtractionAttempts = 3;
 
@@ -48,7 +48,7 @@ export async function cookingAssistant({
   let memoryExtraction;
 
   while (extractionAttempts < numExtractionAttempts && !extractionSuccessful) {
-    memoryExtraction = extractMemory(message)(sentinalMessage);
+    memoryExtraction = await extractMemory(message)();
     if (notify) {
       notify({
         name: "MEMORY_EXTRACTOR",
@@ -59,26 +59,27 @@ export async function cookingAssistant({
     }
 
     // memory review
-    const memoryReview = checkMemoryExtraction(llmMessage)(memoryExtraction);
+    const memoryReview = await checkMemoryExtraction(message)(memoryExtraction);
     if (notify) {
       notify({
         name: "MEMORY_REVIEWER",
         containsInformation: true,
-        extractionSuccessful: memoryReview.extractionSuccessful,
+        extractionSuccessful: memoryReview.is_perfect,
+        description: memoryReview.criticism,
         actions: [],
       });
     }
 
-    extractionSuccessful = memoryReview.extractionSuccessful;
+    extractionSuccessful = memoryReview.is_perfect;
     extractionAttempts++;
   }
 
-  if (!memoryExtraction) {
+  if (!memoryExtraction || !extractionSuccessful) {
     return;
   }
 
   // action assigner
-  const memoryActions = actionAssigner(llmMessage)(memoryExtraction);
+  const memoryActions = await actionAssigner(message)(memoryExtraction, []);
   if (notify) {
     notify({
       name: "ACTION_ASSIGNER",
@@ -89,7 +90,7 @@ export async function cookingAssistant({
   }
 
   // category assigner
-  const memoryCategories = categoryAssigner(llmMessage)(memoryActions);
+  const memoryCategories = await categoryAssigner(message)(memoryActions);
   if (notify) {
     notify({
       name: "CATEGORY_ASSIGNER",

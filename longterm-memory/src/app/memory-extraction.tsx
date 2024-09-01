@@ -22,10 +22,13 @@ function memoryExtractionMessage(actions: MemoryAction[]) {
   return `Memory extraction results from attempt #1: ${memories}`;
 }
 
-function memoryReviewMessage(extractionSuccessful: boolean) {
+function memoryReviewMessage({
+  extractionSuccessful,
+  description,
+}: AgentEvent) {
   return extractionSuccessful
     ? "Memory extraction successful."
-    : "Memory extraction failed.";
+    : `Memory extraction failed.\n  ${description}`;
 }
 
 function memoryActionAssignerMessage(actions: MemoryAction[]) {
@@ -43,7 +46,7 @@ export function renderEventMessage(event: AgentEvent) {
   } else if (event.name === "MEMORY_EXTRACTOR") {
     return memoryExtractionMessage(event.actions);
   } else if (event.name === "MEMORY_REVIEWER") {
-    return memoryReviewMessage(event.extractionSuccessful);
+    return memoryReviewMessage(event);
   } else if (event.name === "ACTION_ASSIGNER") {
     return memoryActionAssignerMessage(event.actions);
   } else if (event.name === "CATEGORY_ASSIGNER") {

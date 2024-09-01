@@ -10,10 +10,11 @@ export interface AgentEvent {
   containsInformation: boolean;
   extractionSuccessful: boolean;
   actions: MemoryAction[];
+  description?: string;
 }
 
 export interface MemoryAction {
   knowledge: string;
   action?: "CREATE" | "UPDATE" | "DELETE";
-  category?: "ATTRIBUTE" | "ACTION";
+  category?: "ALLERGY" | "LIKE" | "DISLIKE" | "ATTRIBUTE";
 }

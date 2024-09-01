@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 
 export interface Memory {
   knowledge: string;
-  category: "ATTRIBUTE" | "ACTION";
+  category: "ALLERGY" | "LIKE" | "DISLIKE" | "ATTRIBUTE";
 }
 
 export interface MemoryProps {

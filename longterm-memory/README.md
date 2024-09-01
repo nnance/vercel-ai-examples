@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## To Do
+
+[ ] fix sentinel name
+[ ] update assistant for memories as input and output of the AI
+[ ] infer the AI schema from the TS interfaces
+[ ] improve the provider and model API
+[ ] use the AI Chat SDK to create a chatbot
+[ ] create a chatbot that can be used to store long-term memories
+[ ] Move all AI assistant flow to the server
+[ ] add the ability to store the memory in a database
+[ ] fix UI to have each column full height
+
 ## Getting Started
 
 First, run the development server:
