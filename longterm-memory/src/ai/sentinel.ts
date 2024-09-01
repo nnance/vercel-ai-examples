@@ -30,7 +30,7 @@ You should ONLY RESPOND WITH TRUE OR FALSE. Absolutely no other information shou
 Take a deep breath, think step by step, and then analyze the following message:
 `;
 
-export async function sentinalCheck(message: string): Promise<SentinalResult> {
+export async function sentinelCheck(message: string): Promise<SentinalResult> {
   const provider = getProvider(process.env.NEXT_PUBLIC_PROVIDER);
   const modelName = getModelName(process.env.NEXT_PUBLIC_PROVIDER);
   const model = provider(modelName);

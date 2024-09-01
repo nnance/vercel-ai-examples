@@ -2,7 +2,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## To Do
 
-[ ] fix sentinel name
+[x] fix sentinel name
 [ ] update assistant for memories as input and output of the AI
 [ ] infer the AI schema from the TS interfaces
 [ ] improve the provider and model API

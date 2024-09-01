@@ -4,7 +4,7 @@ import { AgentEvent, MemoryAction } from "./interfaces";
 import { chatCompletion } from "./llm";
 import { extractMemory } from "./memory-extractor";
 import { checkMemoryExtraction } from "./memory-reviewer";
-import { sentinalCheck } from "./sentinal";
+import { sentinelCheck } from "./sentinel";
 
 const numExtractionAttempts = 3;
 
@@ -28,7 +28,7 @@ export async function cookingAssistant({
   }
 
   // sentinal check
-  const sentinalMessage = await sentinalCheck(message);
+  const sentinalMessage = await sentinelCheck(message);
   if (notify) {
     notify({
       name: "SENTINEL",
