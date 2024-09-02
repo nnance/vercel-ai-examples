@@ -120,7 +120,5 @@ export async function cookingAssistant({
     memories
   );
 
-  console.log(newMemories);
-
   return newMemories;
 }
