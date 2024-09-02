@@ -96,9 +96,6 @@ export const checkMemoryExtraction =
       return `${acc}Memory ${index + 1}: ${memory.knowledge}\n`;
     }, "");
 
-    console.log(aiAnalysis);
-    console.log(message);
-
     const { object } = await generateObject({
       model,
       system: systemPrompt(aiAnalysis),
@@ -114,6 +111,5 @@ export const checkMemoryExtraction =
       }),
     });
 
-    console.log(object);
     return object;
   };

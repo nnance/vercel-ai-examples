@@ -44,10 +44,6 @@ export const categoryAssigner =
         knowledge: z.string({
           description: "If this failed, provide your explanation",
         }),
-        action: z.enum(["CREATE", "UPDATE", "DELETE"], {
-          description:
-            "The action to take on this memory: either CREATE, UPDATE, or DELETE",
-        }),
         category: z.enum(["ALLERGY", "LIKE", "DISLIKE", "ATTRIBUTE"], {
           description:
             "The category for this action: either ALLERGY, LIKE, DISLIE, OR ATTRIBUTE",

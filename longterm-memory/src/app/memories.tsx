@@ -1,12 +1,8 @@
+import { Memory } from "@/ai/interfaces";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X } from "lucide-react";
-
-export interface Memory {
-  knowledge: string;
-  category: "ALLERGY" | "LIKE" | "DISLIKE" | "ATTRIBUTE";
-}
 
 export interface MemoryProps {
   memories: Memory[];

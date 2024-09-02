@@ -13,8 +13,21 @@ export interface AgentEvent {
   description?: string;
 }
 
-export interface MemoryAction {
+export interface Knowledge {
   knowledge: string;
+}
+
+export interface Memory extends Knowledge {
+  category: "ALLERGY" | "LIKE" | "DISLIKE" | "ATTRIBUTE";
+}
+
+export interface MemoryAction extends Knowledge {
   action?: "CREATE" | "UPDATE" | "DELETE";
-  category?: "ALLERGY" | "LIKE" | "DISLIKE" | "ATTRIBUTE";
+  category?: Memory["category"];
+  index?: number;
+}
+
+export interface MemoryReview {
+  is_perfect: boolean;
+  criticism: string;
 }

@@ -2,11 +2,11 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { MemoryExtraction } from "./memory-extraction";
-import { Memories, Memory } from "./memories";
+import { Memories } from "./memories";
 import { Chat, ChatMessage } from "./chat";
 import { useState } from "react";
 import { cookingAssistant } from "@/ai/assistant";
-import { AgentEvent, MemoryAction } from "@/ai/interfaces";
+import { AgentEvent, Memory } from "@/ai/interfaces";
 
 export default function Component() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -30,27 +30,15 @@ export default function Component() {
     setEvents((events) => [...events, event]);
   };
 
-  const handleMemoryExtraction = (action: MemoryAction) => {
-    const memory: Memory = {
-      knowledge: action.knowledge,
-      category: action.category!,
-    };
-
-    if (action.action === "DELETE") {
-      deleteMemory(memories.findIndex((m) => m.knowledge === action.knowledge));
-    } else {
-      setMemories((memories) => [...memories, memory]);
-    }
-  };
-
-  const sendMessage = (message: ChatMessage) => {
+  const sendMessage = async (message: ChatMessage) => {
     setMessages((messages) => [...messages, message]);
-    cookingAssistant({
+    const newMemories = await cookingAssistant({
       message: message.text,
+      memories,
       response: handleLLMResponse,
       notify: handleAgentEvent,
-      action: handleMemoryExtraction,
     });
+    setMemories(newMemories);
   };
 
   return (

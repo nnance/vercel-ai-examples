@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import { MemoryAction } from "./interfaces";
+import { Memory, MemoryAction } from "./interfaces";
 import { getModelName, getProvider } from "./llm";
 
 const systemPrompt = (existing_memories: string, new_memories: string) => `
@@ -19,6 +19,7 @@ When you receive a message, you perform a sequence of steps consisting of:
 1. Internally analyze and understand all the existing memories
 2. Internally compare the new memories to the existing list
 3. For each piece of new knowledge, determine if this is new knowledge, an update to old knowledge that now needs to change, or should result in deleting information that is not correct. It's possible that a food you previously wrote as a dislike might now be a like, or that a family member who previously liked a food now dislikes it - those examples would require an update.
+4. If you determine that a piece of knowledge needs to be updated or deleted, you will need to provide the index of the memory in the existing list that needs to be updated or deleted.
 
 Here are the existing bits of information that we have about the family.
 
@@ -34,10 +35,10 @@ ${new_memories}
 `;
 
 export const actionAssigner =
-  (message: string) =>
+  () =>
   async (
     extractedMemory: MemoryAction[],
-    existingMemories: []
+    existingMemories: Memory[]
   ): Promise<MemoryAction[]> => {
     const provider = getProvider(process.env.NEXT_PUBLIC_PROVIDER);
     const modelName = getModelName(process.env.NEXT_PUBLIC_PROVIDER);
@@ -45,11 +46,10 @@ export const actionAssigner =
 
     const { object } = await generateObject({
       model,
-      system: systemPrompt(
+      prompt: systemPrompt(
         JSON.stringify(existingMemories),
         JSON.stringify(extractedMemory)
       ),
-      prompt: message,
       output: "array",
       schema: z.object({
         knowledge: z.string({
@@ -59,6 +59,16 @@ export const actionAssigner =
           description:
             "The action to take on this memory: either CREATE, UPDATE, or DELETE",
         }),
+        category: z.enum(["ALLERGY", "LIKE", "DISLIKE", "ATTRIBUTE"], {
+          description:
+            "The category for this action: either ALLERGY, LIKE, DISLIE, OR ATTRIBUTE",
+        }),
+        index: z
+          .number({
+            description:
+              "The index of the memory in the existing list that needs to be updated or deleted",
+          })
+          .optional(),
       }),
     });
 

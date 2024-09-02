@@ -1,6 +1,6 @@
 import { actionAssigner } from "./action-assigner";
 import { categoryAssigner } from "./category-assigner";
-import { AgentEvent, MemoryAction } from "./interfaces";
+import { AgentEvent, Memory, MemoryAction } from "./interfaces";
 import { chatCompletion } from "./llm";
 import { extractMemory } from "./memory-extractor";
 import { checkMemoryExtraction } from "./memory-reviewer";
@@ -10,14 +10,14 @@ const numExtractionAttempts = 3;
 
 export async function cookingAssistant({
   message,
+  memories,
   response,
   notify,
-  action,
 }: {
   message: string;
+  memories: Memory[];
   response?: (response: string) => void;
   notify?: (event: AgentEvent) => void;
-  action?: (action: MemoryAction) => void;
 }) {
   const llmMessage = await chatCompletion({
     text: message,
@@ -39,7 +39,7 @@ export async function cookingAssistant({
   }
 
   if (!sentinalMessage.containsInformation) {
-    return;
+    return memories;
   }
 
   // memory extraction
@@ -75,22 +75,11 @@ export async function cookingAssistant({
   }
 
   if (!memoryExtraction || !extractionSuccessful) {
-    return;
-  }
-
-  // action assigner
-  const memoryActions = await actionAssigner(message)(memoryExtraction, []);
-  if (notify) {
-    notify({
-      name: "ACTION_ASSIGNER",
-      containsInformation: true,
-      extractionSuccessful: true,
-      actions: memoryActions,
-    });
+    return memories;
   }
 
   // category assigner
-  const memoryCategories = await categoryAssigner(message)(memoryActions);
+  const memoryCategories = await categoryAssigner(message)(memoryExtraction);
   if (notify) {
     notify({
       name: "CATEGORY_ASSIGNER",
@@ -100,8 +89,38 @@ export async function cookingAssistant({
     });
   }
 
-  // process memory actions
-  if (action) {
-    memoryCategories.forEach(action);
+  // action assigner
+  const memoryActions = await actionAssigner()(memoryCategories, memories);
+  if (notify) {
+    notify({
+      name: "ACTION_ASSIGNER",
+      containsInformation: true,
+      extractionSuccessful: true,
+      actions: memoryActions,
+    });
   }
+
+  // process memory actions
+  const newMemories = memoryActions.reduce<Memory[]>(
+    (acc, { action, knowledge, category, index }) => {
+      const newMemory = {
+        knowledge,
+        category: category!,
+      };
+      if (action === "CREATE") {
+        return [...acc, newMemory];
+      } else if (action === "UPDATE" && index !== undefined && index > -1) {
+        return acc.map((m, i) => (i === index ? newMemory : m));
+      } else if (action === "DELETE" && index !== undefined && index > -1) {
+        return acc.filter((_, i) => i !== index);
+      } else {
+        return acc;
+      }
+    },
+    memories
+  );
+
+  console.log(newMemories);
+
+  return newMemories;
 }
