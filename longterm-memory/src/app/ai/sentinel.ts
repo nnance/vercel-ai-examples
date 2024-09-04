@@ -31,8 +31,8 @@ Take a deep breath, think step by step, and then analyze the following message:
 `;
 
 export async function sentinelCheck(message: string): Promise<SentinalResult> {
-  const provider = getProvider(process.env.NEXT_PUBLIC_PROVIDER);
-  const modelName = getModelName(process.env.NEXT_PUBLIC_PROVIDER);
+  const provider = getProvider();
+  const modelName = getModelName();
   const model = provider(modelName);
 
   const { text } = await generateText({

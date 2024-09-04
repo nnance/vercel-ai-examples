@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import { MemoryAction } from "./interfaces";
+import { MemoryAction } from "@/interfaces";
 import { getModelName, getProvider } from "./llm";
 
 interface MemoryReviewResults {
@@ -88,8 +88,8 @@ Here is the AI analysis and original message history to analyze:
 export const checkMemoryExtraction =
   (message: string) =>
   async (extractedMemory: MemoryAction[]): Promise<MemoryReviewResults> => {
-    const provider = getProvider(process.env.NEXT_PUBLIC_PROVIDER);
-    const modelName = getModelName(process.env.NEXT_PUBLIC_PROVIDER);
+    const provider = getProvider();
+    const modelName = getModelName();
     const model = provider(modelName);
 
     const aiAnalysis = extractedMemory.reduce((acc, memory, index) => {

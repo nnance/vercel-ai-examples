@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import { MemoryAction } from "./interfaces";
+import { MemoryAction } from "@/interfaces";
 import { getModelName, getProvider } from "./llm";
 
 const systemPrompt = (memories: string) => `
@@ -31,8 +31,8 @@ Take a deep breath, and think step by step.
 export const categoryAssigner =
   (message: string) =>
   async (memoryWithActions: MemoryAction[]): Promise<MemoryAction[]> => {
-    const provider = getProvider(process.env.NEXT_PUBLIC_PROVIDER);
-    const modelName = getModelName(process.env.NEXT_PUBLIC_PROVIDER);
+    const provider = getProvider();
+    const modelName = getModelName();
     const model = provider(modelName);
 
     const { object } = await generateObject({

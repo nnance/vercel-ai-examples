@@ -7,7 +7,8 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 [ ] infer the AI schema from the TS interfaces
 [ ] improve the provider and model API
 [ ] use the AI Chat SDK to create a chatbot
-[ ] Move all AI assistant flow to the server
+[x] Move all AI assistant flow to the server
+[ ] Stream the AI assistant events to the client
 [ ] add the ability to store the memory in a database
 [ ] fix UI to have each column full height
 

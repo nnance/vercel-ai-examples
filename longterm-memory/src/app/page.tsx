@@ -3,13 +3,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { MemoryExtraction } from "./memory-extraction";
 import { Memories } from "./memories";
-import { Chat, ChatMessage } from "./chat";
+import { Chat } from "./chat";
 import { useState } from "react";
-import { cookingAssistant } from "@/ai/assistant";
-import { AgentEvent, Memory } from "@/ai/interfaces";
+import { AgentEvent, Memory } from "@/interfaces";
 
 export default function Component() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [memories, setMemories] = useState<Memory[]>([]);
   const [events, setEvents] = useState<AgentEvent[]>([]);
 
@@ -18,27 +16,8 @@ export default function Component() {
     setMemories(newMemories);
   };
 
-  const handleLLMResponse = (response: string) => {
-    const newMessage: ChatMessage = {
-      text: response,
-      sender: "CHEF",
-    };
-    setMessages((messages) => [...messages, newMessage]);
-  };
-
   const handleAgentEvent = (event: AgentEvent) => {
     setEvents((events) => [...events, event]);
-  };
-
-  const sendMessage = async (message: ChatMessage) => {
-    setMessages((messages) => [...messages, message]);
-    const newMemories = await cookingAssistant({
-      message: message.text,
-      memories,
-      response: handleLLMResponse,
-      notify: handleAgentEvent,
-    });
-    setMemories(newMemories);
   };
 
   return (
@@ -46,7 +25,7 @@ export default function Component() {
       <Card className="w-full h-full rounded-none">
         <CardContent className="p-4 h-[calc(100vh-5rem)]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-full">
-            <Chat messages={messages} sendMessage={sendMessage} />
+            <Chat setMemories={setMemories} eventHandler={handleAgentEvent} />
             <MemoryExtraction events={events} />
             <Memories memories={memories} deleteMemory={deleteMemory} />
           </div>

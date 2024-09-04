@@ -2,62 +2,68 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MessageCircle } from "lucide-react";
-import { useState } from "react";
+import { Message, useChat } from "ai/react";
+import { ChatRequestOptions } from "ai";
+import { Dispatch, SetStateAction } from "react";
+import { AgentEvent, Memory } from "@/interfaces";
 
-export interface ChatMessage {
-  text: string;
-  sender: "USER" | "CHEF";
+interface ChatProps {
+  setMemories: Dispatch<SetStateAction<Memory[]>>;
+  eventHandler: (event: AgentEvent) => void;
 }
 
-export interface ChatProps {
-  messages: ChatMessage[];
-  sendMessage: (message: ChatMessage) => void;
-}
-
-export function Chat(props: ChatProps) {
-  const { messages, sendMessage } = props;
-  const [message, setMessage] = useState("");
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setMessage(event.target.value);
-  };
+export function Chat({ setMemories, eventHandler }: ChatProps) {
+  const { messages, input, handleInputChange, handleSubmit } = useChat();
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      handleButtonClick();
+      handleSend();
     }
   };
 
-  const handleButtonClick = () => {
-    sendMessage({
-      text: message,
-      sender: "USER",
+  const handleSend = (
+    event?: {
+      preventDefault?: () => void;
+    },
+    chatRequestOptions?: ChatRequestOptions
+  ) => {
+    handleSubmit(event, chatRequestOptions);
+    fetch("/api/assistant", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ input }),
+    }).then((response) => {
+      if (response.ok) {
+        response.json().then(({ memories, events }) => {
+          setMemories(memories);
+          events.forEach(eventHandler);
+        });
+      }
     });
-    setMessage("");
-    // set the focus back to the input field
-    document.querySelector("input")?.focus();
   };
 
-  const renderMessage = (message: ChatMessage, index: number) => {
+  const renderMessage = (message: Message, index: number) => {
     return (
       <div
         key={index}
         className={
-          message.sender === "USER"
+          message.role === "user"
             ? "bg-orange-100 p-3 rounded-md"
             : "bg-blue-100 p-3 rounded-md"
         }
       >
         <h3
           className={
-            message.sender === "USER"
+            message.role === "user"
               ? "font-semibold text-orange-700"
               : "font-semibold text-blue-700"
           }
         >
-          {message.sender === "USER" ? "You" : "Chef Lisa"}
+          {message.role === "user" ? "You" : "Chef Lisa"}
         </h3>
-        <p>{message.text}</p>
+        <p>{message.content}</p>
       </div>
     );
   };
@@ -75,19 +81,21 @@ export function Chat(props: ChatProps) {
           >
             {messages.map(renderMessage)}
           </div>
-          <div className="flex flex-col space-y-2">
-            <Input
-              placeholder="Chat with Lisa"
-              aria-label="Chat input"
-              value={message}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-            />
-            <Button className="w-full" onClick={handleButtonClick}>
-              <MessageCircle className="mr-2 h-4 w-4" />
-              Submit
-            </Button>
-          </div>
+          <form onSubmit={handleSend}>
+            <div className="flex flex-col space-y-2">
+              <Input
+                placeholder="Chat with Lisa"
+                aria-label="Chat input"
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+              />
+              <Button className="w-full" onClick={handleSubmit}>
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Submit
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

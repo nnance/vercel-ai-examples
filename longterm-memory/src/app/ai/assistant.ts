@@ -1,7 +1,6 @@
 import { actionAssigner } from "./action-assigner";
 import { categoryAssigner } from "./category-assigner";
-import { AgentEvent, Memory, MemoryAction } from "./interfaces";
-import { chatCompletion } from "./llm";
+import { AgentEvent, Memory } from "@/interfaces";
 import { extractMemory } from "./memory-extractor";
 import { checkMemoryExtraction } from "./memory-reviewer";
 import { sentinelCheck } from "./sentinel";
@@ -11,22 +10,12 @@ const numExtractionAttempts = 3;
 export async function cookingAssistant({
   message,
   memories,
-  response,
   notify,
 }: {
   message: string;
   memories: Memory[];
-  response?: (response: string) => void;
   notify?: (event: AgentEvent) => void;
 }) {
-  const llmMessage = await chatCompletion({
-    text: message,
-    sender: "USER",
-  });
-  if (response) {
-    response(llmMessage.text);
-  }
-
   // sentinal check
   const sentinalMessage = await sentinelCheck(message);
   if (notify) {
