@@ -34,3 +34,5 @@ export function getModelName() {
     return process.env.LOCAL_MODEL!;
   }
 }
+
+export const getModel = () => getProvider()(getModelName());

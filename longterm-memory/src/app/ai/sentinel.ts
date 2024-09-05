@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { getProvider, getModelName } from "./llm";
+import { getProvider, getModelName, getModel } from "./llm";
 
 export interface SentinalResult {
   containsInformation: boolean;
@@ -31,9 +31,7 @@ Take a deep breath, think step by step, and then analyze the following message:
 `;
 
 export async function sentinelCheck(message: string): Promise<SentinalResult> {
-  const provider = getProvider();
-  const modelName = getModelName();
-  const model = provider(modelName);
+  const model = getModel();
 
   const { text } = await generateText({
     model,

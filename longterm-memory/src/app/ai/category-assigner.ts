@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import { MemoryAction } from "@/interfaces";
-import { getModelName, getProvider } from "./llm";
+import { getModel, getModelName, getProvider } from "./llm";
 
 const systemPrompt = (memories: string) => `
 Your job is to assign a category to each memory in a list of new memories.
@@ -31,9 +31,7 @@ Take a deep breath, and think step by step.
 export const categoryAssigner =
   (message: string) =>
   async (memoryWithActions: MemoryAction[]): Promise<MemoryAction[]> => {
-    const provider = getProvider();
-    const modelName = getModelName();
-    const model = provider(modelName);
+    const model = getModel();
 
     const { object } = await generateObject({
       model,

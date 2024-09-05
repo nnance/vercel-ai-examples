@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { MemoryAction } from "@/interfaces";
-import { getProvider, getModelName } from "./llm";
+import { getProvider, getModelName, getModel } from "./llm";
 import { z } from "zod";
 
 const systemPrompt = `
@@ -35,9 +35,7 @@ Take a deep breath, think step by step, and then analyze the following messages:
 
 export const extractMemory =
   (message: string) => async (): Promise<MemoryAction[]> => {
-    const provider = getProvider();
-    const modelName = getModelName();
-    const model = provider(modelName);
+    const model = getModel();
 
     const { object } = await generateObject({
       model,

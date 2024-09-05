@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import { MemoryAction } from "@/interfaces";
-import { getModelName, getProvider } from "./llm";
+import { getModel, getModelName, getProvider } from "./llm";
 
 interface MemoryReviewResults {
   is_perfect: boolean;
@@ -88,9 +88,7 @@ Here is the AI analysis and original message history to analyze:
 export const checkMemoryExtraction =
   (message: string) =>
   async (extractedMemory: MemoryAction[]): Promise<MemoryReviewResults> => {
-    const provider = getProvider();
-    const modelName = getModelName();
-    const model = provider(modelName);
+    const model = getModel();
 
     const aiAnalysis = extractedMemory.reduce((acc, memory, index) => {
       return `${acc}Memory ${index + 1}: ${memory.knowledge}\n`;
