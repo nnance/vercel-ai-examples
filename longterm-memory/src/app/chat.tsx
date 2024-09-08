@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction } from "react";
 import { AgentEvent, AgentStatus, Memory } from "@/interfaces";
 
 interface ChatProps {
+  memories: Memory[];
   setMemories: Dispatch<SetStateAction<Memory[]>>;
   eventHandler: (event: AgentEvent) => void;
 }
@@ -35,7 +36,7 @@ export async function* streamingFetch(
   }
 }
 
-export function Chat({ setMemories, eventHandler }: ChatProps) {
+export function Chat({ memories, setMemories, eventHandler }: ChatProps) {
   const { messages, input, handleInputChange, handleSubmit } = useChat();
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -50,7 +51,7 @@ export function Chat({ setMemories, eventHandler }: ChatProps) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ input }),
+      body: JSON.stringify({ input, memories }),
     });
 
     for await (let value of it) {

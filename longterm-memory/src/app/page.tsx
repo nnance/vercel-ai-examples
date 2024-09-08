@@ -25,7 +25,11 @@ export default function Component() {
       <Card className="w-full h-full rounded-none">
         <CardContent className="p-4 h-[calc(100vh-5rem)]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-full">
-            <Chat setMemories={setMemories} eventHandler={handleAgentEvent} />
+            <Chat
+              memories={memories}
+              setMemories={setMemories}
+              eventHandler={handleAgentEvent}
+            />
             <MemoryExtraction events={events} />
             <Memories memories={memories} deleteMemory={deleteMemory} />
           </div>

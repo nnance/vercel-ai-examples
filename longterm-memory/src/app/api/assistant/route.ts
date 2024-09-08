@@ -28,14 +28,18 @@ const makeStream = <T extends AgentEvent, Y extends Memory[]>(
 };
 
 export async function POST(req: NextRequest) {
-  const { input } = (await req.json()) as { input: string };
+  const { input, memories } = (await req.json()) as {
+    input: string;
+    memories: Memory[];
+  };
 
   const stream = makeStream(
     cookingAssistant({
       message: input,
-      memories: [],
+      memories,
     })
   );
+
   const response = new NextResponse(stream);
   return response;
 }
