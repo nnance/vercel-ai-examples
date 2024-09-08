@@ -1,44 +1,34 @@
-import { AgentEvent } from "@/interfaces";
+import { AgentEvent, AgentStatus, Memory } from "@/interfaces";
 import { cookingAssistant } from "../../ai/assistant";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-// Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
-
-const makeStream = <T extends AgentEvent>(
-  generator: AsyncGenerator<T, void, unknown>
-) => {
+const encodeAgentStatus = (status: AgentStatus) => {
   const encoder = new TextEncoder();
-  return new ReadableStream<any>({
+  return encoder.encode(JSON.stringify(status));
+};
+
+const makeStream = <T extends AgentEvent, Y extends Memory[]>(
+  generator: AsyncGenerator<T, Y, unknown>
+) => {
+  return new ReadableStream<Uint8Array>({
     async start(controller) {
-      for await (let chunk of generator) {
-        const chunkData = encoder.encode(JSON.stringify(chunk));
-        controller.enqueue(chunkData);
+      controller.enqueue(encodeAgentStatus({ type: "BUSY", isBusy: true }));
+      const it = generator[Symbol.asyncIterator]();
+      let r;
+      while ((r = await it.next())) {
+        const status: AgentStatus = r.done
+          ? { type: "MEMORY", isBusy: false, payload: r.value }
+          : { type: "EVENT", isBusy: true, payload: r.value };
+        controller.enqueue(encodeAgentStatus(status));
+        if (r.done) break;
       }
       controller.close();
     },
   });
 };
 
-/**
- * A custom Response subclass that accepts a ReadableStream.
- * This allows creating a streaming Response for async generators.
- */
-class StreamingResponse extends Response {
-  constructor(res: ReadableStream<any>, init?: ResponseInit) {
-    super(res as any, {
-      ...init,
-      status: 200,
-      headers: {
-        ...init?.headers,
-      },
-    });
-  }
-}
-
 export async function POST(req: NextRequest) {
   const { input } = (await req.json()) as { input: string };
-  console.dir(input);
 
   const stream = makeStream(
     cookingAssistant({
@@ -46,6 +36,6 @@ export async function POST(req: NextRequest) {
       memories: [],
     })
   );
-  const response = new StreamingResponse(stream);
+  const response = new NextResponse(stream);
   return response;
 }

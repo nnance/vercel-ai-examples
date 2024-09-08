@@ -5,7 +5,7 @@ import { MessageCircle } from "lucide-react";
 import { Message, useChat } from "ai/react";
 import { ChatRequestOptions } from "ai";
 import { Dispatch, SetStateAction } from "react";
-import { AgentEvent, Memory } from "@/interfaces";
+import { AgentEvent, AgentStatus, Memory } from "@/interfaces";
 
 interface ChatProps {
   setMemories: Dispatch<SetStateAction<Memory[]>>;
@@ -55,8 +55,12 @@ export function Chat({ setMemories, eventHandler }: ChatProps) {
 
     for await (let value of it) {
       try {
-        const event = JSON.parse(value) as AgentEvent;
-        eventHandler(event);
+        const { type, payload } = JSON.parse(value) as AgentStatus;
+        if (type === "EVENT") {
+          eventHandler(payload as AgentEvent);
+        } else if (type === "MEMORY") {
+          setMemories(payload as Memory[]);
+        }
       } catch (e: any) {
         console.warn(e.message);
       }

@@ -13,7 +13,7 @@ export async function* cookingAssistant({
 }: {
   message: string;
   memories: Memory[];
-}): AsyncGenerator<AgentEvent> {
+}): AsyncGenerator<AgentEvent, Memory[]> {
   // sentinal check
   const sentinalMessage = await sentinelCheck(message);
   yield {

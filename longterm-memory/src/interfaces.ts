@@ -13,6 +13,12 @@ export interface AgentEvent {
   description?: string;
 }
 
+export interface AgentStatus {
+  type: "EVENT" | "MEMORY" | "IDLE" | "BUSY";
+  isBusy: boolean;
+  payload?: AgentEvent | Memory[];
+}
+
 export interface Knowledge {
   knowledge: string;
 }
