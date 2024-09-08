@@ -7,25 +7,21 @@ import { sentinelCheck } from "./sentinel";
 
 const numExtractionAttempts = 3;
 
-export async function cookingAssistant({
+export async function* cookingAssistant({
   message,
   memories,
-  notify,
 }: {
   message: string;
   memories: Memory[];
-  notify?: (event: AgentEvent) => void;
-}) {
+}): AsyncGenerator<AgentEvent> {
   // sentinal check
   const sentinalMessage = await sentinelCheck(message);
-  if (notify) {
-    notify({
-      name: "SENTINEL",
-      containsInformation: sentinalMessage.containsInformation,
-      extractionSuccessful: false,
-      actions: [],
-    });
-  }
+  yield {
+    name: "SENTINEL",
+    containsInformation: sentinalMessage.containsInformation,
+    extractionSuccessful: false,
+    actions: [],
+  };
 
   if (!sentinalMessage.containsInformation) {
     return memories;
@@ -38,26 +34,22 @@ export async function cookingAssistant({
 
   while (extractionAttempts < numExtractionAttempts && !extractionSuccessful) {
     memoryExtraction = await extractMemory(message)();
-    if (notify) {
-      notify({
-        name: "MEMORY_EXTRACTOR",
-        containsInformation: true,
-        extractionSuccessful: false,
-        actions: memoryExtraction,
-      });
-    }
+    yield {
+      name: "MEMORY_EXTRACTOR",
+      containsInformation: true,
+      extractionSuccessful: false,
+      actions: memoryExtraction,
+    };
 
     // memory review
     const memoryReview = await checkMemoryExtraction(message)(memoryExtraction);
-    if (notify) {
-      notify({
-        name: "MEMORY_REVIEWER",
-        containsInformation: true,
-        extractionSuccessful: memoryReview.is_perfect,
-        description: memoryReview.criticism,
-        actions: [],
-      });
-    }
+    yield {
+      name: "MEMORY_REVIEWER",
+      containsInformation: true,
+      extractionSuccessful: memoryReview.is_perfect,
+      description: memoryReview.criticism,
+      actions: [],
+    };
 
     extractionSuccessful = memoryReview.is_perfect;
     extractionAttempts++;
@@ -69,25 +61,21 @@ export async function cookingAssistant({
 
   // category assigner
   const memoryCategories = await categoryAssigner(message)(memoryExtraction);
-  if (notify) {
-    notify({
-      name: "CATEGORY_ASSIGNER",
-      containsInformation: true,
-      extractionSuccessful: true,
-      actions: memoryCategories,
-    });
-  }
+  yield {
+    name: "CATEGORY_ASSIGNER",
+    containsInformation: true,
+    extractionSuccessful: true,
+    actions: memoryCategories,
+  };
 
   // action assigner
   const memoryActions = await actionAssigner()(memoryCategories, memories);
-  if (notify) {
-    notify({
-      name: "ACTION_ASSIGNER",
-      containsInformation: true,
-      extractionSuccessful: true,
-      actions: memoryActions,
-    });
-  }
+  yield {
+    name: "ACTION_ASSIGNER",
+    containsInformation: true,
+    extractionSuccessful: true,
+    actions: memoryActions,
+  };
 
   // process memory actions
   const newMemories = memoryActions.reduce<Memory[]>(

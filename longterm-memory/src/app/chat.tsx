@@ -12,6 +12,29 @@ interface ChatProps {
   eventHandler: (event: AgentEvent) => void;
 }
 
+/**
+ * Generator function that streams the response body from a fetch request.
+ */
+export async function* streamingFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit
+) {
+  const response = await fetch(input, init);
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder("utf-8");
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    try {
+      yield decoder.decode(value);
+    } catch (e: any) {
+      console.warn(e.message);
+    }
+  }
+}
+
 export function Chat({ setMemories, eventHandler }: ChatProps) {
   const { messages, input, handleInputChange, handleSubmit } = useChat();
 
@@ -21,27 +44,33 @@ export function Chat({ setMemories, eventHandler }: ChatProps) {
     }
   };
 
+  const asyncFetch = async () => {
+    const it = streamingFetch("/api/assistant", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ input }),
+    });
+
+    for await (let value of it) {
+      try {
+        const event = JSON.parse(value) as AgentEvent;
+        eventHandler(event);
+      } catch (e: any) {
+        console.warn(e.message);
+      }
+    }
+  };
+
   const handleSend = (
     event?: {
       preventDefault?: () => void;
     },
     chatRequestOptions?: ChatRequestOptions
   ) => {
+    asyncFetch();
     handleSubmit(event, chatRequestOptions);
-    fetch("/api/assistant", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ input }),
-    }).then((response) => {
-      if (response.ok) {
-        response.json().then(({ memories, events }) => {
-          setMemories(memories);
-          events.forEach(eventHandler);
-        });
-      }
-    });
   };
 
   const renderMessage = (message: Message, index: number) => {
