@@ -14,13 +14,13 @@ const makeStream = <T extends AgentEvent, Y extends Memory[]>(
     async start(controller) {
       controller.enqueue(encodeAgentStatus({ type: "BUSY", isBusy: true }));
       const it = generator[Symbol.asyncIterator]();
-      let r;
-      while ((r = await it.next())) {
-        const status: AgentStatus = r.done
-          ? { type: "MEMORY", isBusy: false, payload: r.value }
-          : { type: "EVENT", isBusy: true, payload: r.value };
+      while (true) {
+        const { done, value } = await it.next();
+        const status: AgentStatus = done
+          ? { type: "MEMORY", isBusy: false, payload: value }
+          : { type: "EVENT", isBusy: true, payload: value };
         controller.enqueue(encodeAgentStatus(status));
-        if (r.done) break;
+        if (done) break;
       }
       controller.close();
     },

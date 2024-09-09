@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import { Memory, MemoryAction } from "@/interfaces";
-import { getModel, getModelName, getProvider } from "./llm";
+import { getModel } from "./llm";
 
 const systemPrompt = (existing_memories: string, new_memories: string) => `
 Your job is to determine what to do with a list of memories extracted from a chat history.
@@ -39,11 +39,9 @@ export const actionAssigner =
   async (
     extractedMemory: MemoryAction[],
     existingMemories: Memory[]
-  ): Promise<MemoryAction[]> => {
-    const model = getModel();
-
-    const { object } = await generateObject({
-      model,
+  ): Promise<MemoryAction[]> =>
+    generateObject({
+      model: getModel("accurate"),
       prompt: systemPrompt(
         JSON.stringify(existingMemories),
         JSON.stringify(extractedMemory)
@@ -68,7 +66,4 @@ export const actionAssigner =
           })
           .optional(),
       }),
-    });
-
-    return object;
-  };
+    }).then(({ object }) => object);

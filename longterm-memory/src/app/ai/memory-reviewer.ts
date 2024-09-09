@@ -1,12 +1,18 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import { MemoryAction } from "@/interfaces";
-import { getModel, getModelName, getProvider } from "./llm";
+import { getModel } from "./llm";
+import { get } from "http";
 
 interface MemoryReviewResults {
   is_perfect: boolean;
   criticism: string;
 }
+
+const getAIAnalysis = (extractedMemory: MemoryAction[]) =>
+  extractedMemory.reduce((acc, memory, index) => {
+    return `${acc}Memory ${index + 1}: ${memory.knowledge}\n`;
+  }, "");
 
 const systemPrompt = (aiAnalysis: string) => `
 Your job is to compare a set of extracted memories to the original message history. Is anything missing or incorrect? You are very thorough and detail-oriented, so I trust you to catch any mistakes.
@@ -87,16 +93,10 @@ Here is the AI analysis and original message history to analyze:
 
 export const checkMemoryExtraction =
   (message: string) =>
-  async (extractedMemory: MemoryAction[]): Promise<MemoryReviewResults> => {
-    const model = getModel();
-
-    const aiAnalysis = extractedMemory.reduce((acc, memory, index) => {
-      return `${acc}Memory ${index + 1}: ${memory.knowledge}\n`;
-    }, "");
-
-    const { object } = await generateObject({
-      model,
-      system: systemPrompt(aiAnalysis),
+  async (extractedMemory: MemoryAction[]): Promise<MemoryReviewResults> =>
+    generateObject({
+      model: getModel("fast"),
+      system: systemPrompt(getAIAnalysis(extractedMemory)),
       prompt: message,
       schema: z.object({
         is_perfect: z.boolean({
@@ -107,7 +107,4 @@ export const checkMemoryExtraction =
             "What did the AI get wrong? If the analysis is perfect, explain why it is perfect",
         }),
       }),
-    });
-
-    return object;
-  };
+    }).then(({ object }) => object);

@@ -1,6 +1,6 @@
 import { generateObject } from "ai";
 import { MemoryAction } from "@/interfaces";
-import { getProvider, getModelName, getModel } from "./llm";
+import { getModel } from "./llm";
 import { z } from "zod";
 
 const systemPrompt = `
@@ -34,11 +34,9 @@ Take a deep breath, think step by step, and then analyze the following messages:
 `;
 
 export const extractMemory =
-  (message: string) => async (): Promise<MemoryAction[]> => {
-    const model = getModel();
-
-    const { object } = await generateObject({
-      model,
+  (message: string) => async (): Promise<MemoryAction[]> =>
+    generateObject({
+      model: getModel("accurate"),
       system: systemPrompt,
       prompt: message,
       output: "array",
@@ -48,7 +46,4 @@ export const extractMemory =
             "Condensed bit of knowledge to be saved for future reference in the format: [person this is relevant to] [fact to store]",
         }),
       }),
-    });
-
-    return object;
-  };
+    }).then(({ object }) => object);

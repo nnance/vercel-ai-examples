@@ -4,7 +4,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 [x] fix sentinel name
 [x] update assistant for memories as input and output of the AI
-[ ] add model selector for fast, accurate, and local
+[x] add model selector for fast, accurate, and local
 [ ] infer the AI schema from the TS interfaces
 [x] improve the provider and model API
 [x] Use the AI Chat SDK to move AI assistant to the server

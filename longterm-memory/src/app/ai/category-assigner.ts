@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import { MemoryAction } from "@/interfaces";
-import { getModel, getModelName, getProvider } from "./llm";
+import { getModel } from "./llm";
 
 const systemPrompt = (memories: string) => `
 Your job is to assign a category to each memory in a list of new memories.
@@ -30,11 +30,9 @@ Take a deep breath, and think step by step.
 
 export const categoryAssigner =
   (message: string) =>
-  async (memoryWithActions: MemoryAction[]): Promise<MemoryAction[]> => {
-    const model = getModel();
-
-    const { object } = await generateObject({
-      model,
+  async (memoryWithActions: MemoryAction[]): Promise<MemoryAction[]> =>
+    generateObject({
+      model: getModel("accurate"),
       system: systemPrompt(JSON.stringify(memoryWithActions)),
       prompt: message,
       output: "array",
@@ -47,7 +45,4 @@ export const categoryAssigner =
             "The category for this action: either ALLERGY, LIKE, DISLIE, OR ATTRIBUTE",
         }),
       }),
-    });
-
-    return object;
-  };
+    }).then(({ object }) => object);

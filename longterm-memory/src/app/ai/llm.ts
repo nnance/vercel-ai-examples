@@ -1,20 +1,26 @@
+import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAI as createGroq } from "@ai-sdk/openai";
 import { createOpenAI as createOllama } from "@ai-sdk/openai";
 
-export interface LLMChatMessage {
-  text: string;
-  sender:
-    | "USER"
-    | "ASSISTANT"
-    | "SENTINEL"
-    | "MEMORY_EXTRACTOR"
-    | "MEMORY_REVIEWER"
-    | "ACTION_ASSIGNER"
-    | "CATEGORY_ASSIGNER";
+type ModleMode = "fast" | "accurate" | "local";
+type Provider = "groq" | "openai" | "ollama";
+
+function getProviderName(mode: ModleMode): Provider {
+  if (mode === "fast" && process.env.FAST_PROVIDER) {
+    return process.env.FAST_PROVIDER as Provider;
+  } else if (mode === "accurate" && process.env.ACCURATE_PROVIDER) {
+    return process.env.ACCURATE_PROVIDER as Provider;
+  } else {
+    return "ollama";
+  }
 }
 
-export function getProvider() {
-  if (process.env.LLM_PROVIDER === "groq") {
+function getProvider(provider: Provider) {
+  if (provider === "openai") {
+    return createOpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  } else if (provider === "groq") {
     return createGroq({
       baseURL: "https://api.groq.com/openai/v1",
       apiKey: process.env.GROQ_API_KEY,
@@ -27,12 +33,15 @@ export function getProvider() {
   }
 }
 
-export function getModelName() {
-  if (process.env.LLM_PROVIDER === "groq") {
-    return process.env.GROQ_MODEL!;
-  } else {
-    return process.env.LOCAL_MODEL!;
-  }
+function getModelName(providerName: Provider, mode: ModleMode) {
+  return process.env[
+    `${providerName.toUpperCase()}_${mode.toUpperCase()}_MODEL`
+  ];
 }
 
-export const getModel = () => getProvider()(getModelName());
+export const getModel = (mode: ModleMode) => {
+  const providerName = getProviderName(mode);
+  const modelName = getModelName(providerName, mode);
+  const provider = getProvider(providerName);
+  return provider(modelName!);
+};

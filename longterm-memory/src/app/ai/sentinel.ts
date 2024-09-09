@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { getProvider, getModelName, getModel } from "./llm";
+import { getModel } from "./llm";
 
 export interface SentinalResult {
   containsInformation: boolean;
@@ -30,17 +30,12 @@ You should ONLY RESPOND WITH TRUE OR FALSE. Absolutely no other information shou
 Take a deep breath, think step by step, and then analyze the following message:
 `;
 
-export async function sentinelCheck(message: string): Promise<SentinalResult> {
-  const model = getModel();
-
-  const { text } = await generateText({
-    model,
+export const sentinelCheck = async (message: string): Promise<SentinalResult> =>
+  generateText({
+    model: getModel("fast"),
     system: systemPrompt,
     prompt: message,
-  });
-
-  return {
+  }).then(({ text }) => ({
     containsInformation: text.includes("TRUE"),
     confidence: 1,
-  };
-}
+  }));
