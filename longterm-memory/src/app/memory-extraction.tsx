@@ -1,5 +1,16 @@
 import { AgentEvent, MemoryAction } from "@/interfaces";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+
+export function useAgentEventStore() {
+  const [events, setEvents] = useState<AgentEvent[]>([]);
+
+  const addEvent = (event: AgentEvent) => {
+    setEvents((events) => [...events, event]);
+  };
+
+  return { events, addEvent };
+}
 
 export interface MemoryExtractionProps {
   events: AgentEvent[];

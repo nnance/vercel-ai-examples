@@ -4,12 +4,11 @@ import { Input } from "@/components/ui/input";
 import { MessageCircle } from "lucide-react";
 import { Message, useChat } from "ai/react";
 import { ChatRequestOptions } from "ai";
-import { Dispatch, SetStateAction } from "react";
 import { AgentEvent, AgentStatus, Memory } from "@/interfaces";
 
 interface ChatProps {
   memories: Memory[];
-  setMemories: Dispatch<SetStateAction<Memory[]>>;
+  setMemories: (memories: Memory[]) => void;
   eventHandler: (event: AgentEvent) => void;
 }
 

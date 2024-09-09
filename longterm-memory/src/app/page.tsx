@@ -1,24 +1,13 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { MemoryExtraction } from "./memory-extraction";
-import { Memories } from "./memories";
+import { MemoryExtraction, useAgentEventStore } from "./memory-extraction";
+import { Memories, useMemoryStore } from "./memories";
 import { Chat } from "./chat";
-import { useState } from "react";
-import { AgentEvent, Memory } from "@/interfaces";
 
 export default function Component() {
-  const [memories, setMemories] = useState<Memory[]>([]);
-  const [events, setEvents] = useState<AgentEvent[]>([]);
-
-  const deleteMemory = (index: number) => {
-    const newMemories = memories.filter((_, i) => i !== index);
-    setMemories(newMemories);
-  };
-
-  const handleAgentEvent = (event: AgentEvent) => {
-    setEvents((events) => [...events, event]);
-  };
+  const { memories, deleteMemory, updateMemories } = useMemoryStore();
+  const { events, addEvent } = useAgentEventStore();
 
   return (
     <div className="w-full h-screen bg-gray-100 p-0">
@@ -27,8 +16,8 @@ export default function Component() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-full">
             <Chat
               memories={memories}
-              setMemories={setMemories}
-              eventHandler={handleAgentEvent}
+              setMemories={updateMemories}
+              eventHandler={addEvent}
             />
             <MemoryExtraction events={events} />
             <Memories memories={memories} deleteMemory={deleteMemory} />
