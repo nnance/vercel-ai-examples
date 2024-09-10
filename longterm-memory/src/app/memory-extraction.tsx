@@ -87,13 +87,15 @@ export function MemoryExtraction(props: MemoryExtractionProps) {
   };
 
   return (
-    <div className="md:col-span-2 space-y-4 overflow-y-auto h-full">
+    <div className="md:col-span-2 space-y-4 flex flex-col h-full">
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Memory Extraction Agent</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="space-y-2">{events.map(renderEvent)}</div>
+          <div className="space-y-2 overflow-y-auto h-[calc(100vh-8.5rem)]">
+            {events.map(renderEvent)}
+          </div>
         </CardContent>
       </Card>
     </div>

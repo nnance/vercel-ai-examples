@@ -50,12 +50,12 @@ export function Memories(props: MemoryProps) {
   };
 
   return (
-    <div className="md:col-span-1 overflow-y-auto h-full">
+    <div className="md:col-span-1 flex flex-col h-full">
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Long-Term Memories</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-2 overflow-y-auto h-[calc(100vh-7rem)]">
           {memories.map(renderMemory)}
         </CardContent>
       </Card>

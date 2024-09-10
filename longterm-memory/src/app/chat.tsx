@@ -109,7 +109,7 @@ export function Chat({ memories, setMemories, eventHandler }: ChatProps) {
         </CardHeader>
         <CardContent className="space-y-2">
           <div
-            className="flex-grow overflow-y-auto mb-4 space-y-4"
+            className="overflow-y-auto mb-4 space-y-4 h-[calc(100vh-15rem)]"
             aria-label="Chat messages"
           >
             {messages.map(renderMessage)}

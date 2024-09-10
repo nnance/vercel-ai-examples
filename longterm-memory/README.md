@@ -10,7 +10,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 [x] Use the AI Chat SDK to move AI assistant to the server
 [x] Stream the AI assistant events to the client
 [x] add the ability to store the memory in a database
-[ ] fix UI to have each column full height
+[x] fix UI to have each column full height
 
 ## Getting Started
 
