@@ -5,6 +5,8 @@ import { MessageCircle } from "lucide-react";
 import { Message, useChat } from "ai/react";
 import { ChatRequestOptions } from "ai";
 import { AgentEvent, AgentStatus, Memory } from "@/interfaces";
+import { useCallback } from "react";
+import { streamingFetch } from "@/lib/hooks/fetch-streams";
 
 interface ChatProps {
   memories: Memory[];
@@ -12,31 +14,21 @@ interface ChatProps {
   eventHandler: (event: AgentEvent) => void;
 }
 
-/**
- * Generator function that streams the response body from a fetch request.
- */
-export async function* streamingFetch(
-  input: RequestInfo | URL,
-  init?: RequestInit
-) {
-  const response = await fetch(input, init);
-  const reader = response.body!.getReader();
-  const decoder = new TextDecoder("utf-8");
-
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    try {
-      yield decoder.decode(value);
-    } catch (e: any) {
-      console.warn(e.message);
-    }
-  }
+function systemMessage(memories: Memory[]): Message {
+  return {
+    id: "0",
+    role: "system",
+    content: `users food preference and restrictions: ${JSON.stringify(
+      memories
+    )}`,
+  };
 }
 
 export function Chat({ memories, setMemories, eventHandler }: ChatProps) {
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
+  const { messages, input, handleInputChange, handleSubmit, setMessages } =
+    useChat({
+      initialMessages: [systemMessage(memories)],
+    });
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -44,7 +36,7 @@ export function Chat({ memories, setMemories, eventHandler }: ChatProps) {
     }
   };
 
-  const asyncFetch = async () => {
+  const asyncFetch = useCallback(async () => {
     const it = streamingFetch("/api/assistant", {
       method: "POST",
       headers: {
@@ -59,13 +51,19 @@ export function Chat({ memories, setMemories, eventHandler }: ChatProps) {
         if (type === "EVENT") {
           eventHandler(payload as AgentEvent);
         } else if (type === "MEMORY") {
-          setMemories(payload as Memory[]);
+          const memories = payload as Memory[];
+          setMessages((messages) =>
+            messages.map((m) =>
+              m.role !== "system" ? m : systemMessage(memories)
+            )
+          );
+          setMemories(memories);
         }
       } catch (e: any) {
         console.warn(e.message);
       }
     }
-  };
+  }, [input, memories, eventHandler, setMessages, setMemories]);
 
   const handleSend = (
     event?: {
@@ -112,7 +110,7 @@ export function Chat({ memories, setMemories, eventHandler }: ChatProps) {
             className="overflow-y-auto mb-4 space-y-4 h-[calc(100vh-15rem)]"
             aria-label="Chat messages"
           >
-            {messages.map(renderMessage)}
+            {messages.filter((m) => m.role !== "system").map(renderMessage)}
           </div>
           <form onSubmit={handleSend}>
             <div className="flex flex-col space-y-2">
