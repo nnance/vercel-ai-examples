@@ -1,9 +1,11 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { MemoryExtraction, useAgentEventStore } from "./memory-extraction";
-import { Memories, useMemoryStore } from "./memories";
+import { MemoryExtraction } from "./memory-extraction";
+import { Memories } from "./memories";
 import { Chat } from "./chat";
+import { useMemoryStore } from "@/lib/hooks/memory-store";
+import { useAgentEventStore } from "@/lib/hooks/event-store";
 
 export default function Component() {
   const { memories, deleteMemory, updateMemories } = useMemoryStore();
