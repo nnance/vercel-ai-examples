@@ -1,6 +1,7 @@
 import { AgentEvent, AgentStatus, Memory } from "@/interfaces";
 import { cookingAssistant } from "../../ai/assistant";
 import { NextRequest, NextResponse } from "next/server";
+import { Message } from "ai";
 
 const encodeAgentStatus = (status: AgentStatus) => {
   const encoder = new TextEncoder();
@@ -28,14 +29,14 @@ const makeStream = <T extends AgentEvent, Y extends Memory[]>(
 };
 
 export async function POST(req: NextRequest) {
-  const { input, memories } = (await req.json()) as {
-    input: string;
+  const { message, memories } = (await req.json()) as {
+    message: Message;
     memories: Memory[];
   };
 
   const stream = makeStream(
     cookingAssistant({
-      message: input,
+      message: message.content,
       memories,
     })
   );

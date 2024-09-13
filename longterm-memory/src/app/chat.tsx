@@ -3,10 +3,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { MessageCircle } from "lucide-react";
 import { Message, useChat } from "ai/react";
-import { ChatRequestOptions } from "ai";
 import { AgentEvent, AgentStatus, Memory } from "@/interfaces";
-import { useCallback } from "react";
-import { streamingFetch } from "@/lib/hooks/fetch-streams";
+import { useCallback, useEffect, useMemo } from "react";
+import { useStreamPost } from "@/lib/hooks/stream-post";
 
 interface ChatProps {
   memories: Memory[];
@@ -32,20 +31,13 @@ export function Chat({ memories, setMemories, eventHandler }: ChatProps) {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      handleSend();
+      handleSubmit();
     }
   };
 
-  const asyncFetch = useCallback(async () => {
-    const it = streamingFetch("/api/assistant", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ input, memories }),
-    });
-
-    for await (let value of it) {
+  // Handle incoming messages from the assistant
+  const onNext = useCallback(
+    (value: string) => {
       try {
         const { type, payload } = JSON.parse(value) as AgentStatus;
         if (type === "EVENT") {
@@ -62,18 +54,19 @@ export function Chat({ memories, setMemories, eventHandler }: ChatProps) {
       } catch (e: any) {
         console.warn(e.message);
       }
-    }
-  }, [input, memories, eventHandler, setMessages, setMemories]);
-
-  const handleSend = (
-    event?: {
-      preventDefault?: () => void;
     },
-    chatRequestOptions?: ChatRequestOptions
-  ) => {
-    asyncFetch();
-    handleSubmit(event, chatRequestOptions);
-  };
+    [eventHandler, setMessages, setMemories]
+  );
+
+  const { setPayload } = useStreamPost("/api/assistant", { onNext });
+
+  // Send the latest user message and memories to the assistant
+  useEffect(() => {
+    const message = messages[messages.length - 1];
+    if (message.role !== "user") return;
+
+    setPayload(JSON.stringify({ message, memories }));
+  }, [messages, memories, setPayload]);
 
   const renderMessage = (message: Message, index: number) => {
     return (
@@ -112,7 +105,7 @@ export function Chat({ memories, setMemories, eventHandler }: ChatProps) {
           >
             {messages.filter((m) => m.role !== "system").map(renderMessage)}
           </div>
-          <form onSubmit={handleSend}>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col space-y-2">
               <Input
                 placeholder="Chat with Lisa"
