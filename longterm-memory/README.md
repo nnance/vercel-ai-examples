@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Memory AI
+
+This is a project to create an AI that can remember your likes, dislikes, and preferences in food. It is a personal chef that can help recommend recipes and meal planning based on your preferences.
 
 ## To Do
 
@@ -11,6 +13,10 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 [x] Stream the AI assistant events to the client
 [x] add the ability to store the memory in a database
 [x] fix UI to have each column full height
+
+## Overview
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 

@@ -14,12 +14,18 @@ export function Memories(props: MemoryProps) {
 
   const renderMemory = (memory: Memory, index: number) => {
     return (
-      <div key={index} className="flex justify-between items-center">
-        <Badge>{memory.category}</Badge>
-        <span className="text-sm">{memory.knowledge}</span>
-        <Button variant="ghost" size="icon">
-          <X className="h-4 w-4" onClick={() => deleteMemory(index)} />
-        </Button>
+      <div key={index} className="grid grid-cols-[75px_1fr_40px] gap-4">
+        <div>
+          <Badge>{memory.category}</Badge>
+        </div>
+        <div>
+          <span className="text-sm">{memory.knowledge}</span>
+        </div>
+        <div>
+          <Button variant="ghost" size="icon">
+            <X className="h-4 w-4" onClick={() => deleteMemory(index)} />
+          </Button>
+        </div>
       </div>
     );
   };
